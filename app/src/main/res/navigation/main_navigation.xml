@@ -13,6 +13,9 @@
         <action
             android:id="@+id/action_mainScreenFragment_to_detailScreenFragment"
             app:destination="@id/detailScreenFragment" />
+        <argument
+            android:name="Forecast"
+            app:argType="com.martin.weatherestonia.model.Forecast" />
     </fragment>
     <fragment
         android:id="@+id/detailScreenFragment"
@@ -22,5 +25,8 @@
         <action
             android:id="@+id/action_detailScreenFragment_to_mainScreenFragment"
             app:destination="@id/mainScreenFragment" />
+        <argument
+            android:name="Places"
+            app:argType="com.martin.weatherestonia.model.Places" />
     </fragment>
 </navigation>

@@ -11,6 +11,8 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.observers.DisposableSingleObserver
 import io.reactivex.schedulers.Schedulers
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -19,8 +21,8 @@ class MainViewModel @Inject constructor(
 ) : ViewModel() {
 
 
-    private val weather by lazy { MutableLiveData<FutureWeather>() }
-    private val currentWeather by lazy { MutableLiveData<CurrentWeather>() }
+    internal val weather by lazy { MutableLiveData<FutureWeather>() }
+    internal val currentWeather by lazy { MutableLiveData<CurrentWeather>() }
     private val loadError by lazy { MutableLiveData<Boolean>() }
     private val loading by lazy { MutableLiveData<Boolean>() }
 
@@ -47,7 +49,7 @@ class MainViewModel @Inject constructor(
                     override fun onSuccess(futureWeather: FutureWeather) {
 
 
-                        viewModelScope.launch {
+                        GlobalScope.launch(Dispatchers.IO) {
                             weatherDao.insertAllCurrent(futureWeather)
                         }
                         loadError.value = false
@@ -76,7 +78,9 @@ class MainViewModel @Inject constructor(
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(object : DisposableSingleObserver<CurrentWeather>() {
                     override fun onSuccess(current: CurrentWeather) {
-                        viewModelScope.launch {
+
+
+                        GlobalScope.launch(Dispatchers.IO) {
                             weatherDao.insertAllObservation(current)
 
                         }
