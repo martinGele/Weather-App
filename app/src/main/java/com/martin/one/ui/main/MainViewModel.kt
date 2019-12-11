@@ -1,8 +1,8 @@
 package com.martin.one.ui.main
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.martin.one.api.WeatherApiService
 import com.martin.one.db.WeatherDao
 import com.martin.weatherestonia.model.CurrentWeather
@@ -23,9 +23,9 @@ class MainViewModel @Inject constructor(
 
     internal val weather by lazy { MutableLiveData<FutureWeather>() }
     internal val currentWeather by lazy { MutableLiveData<CurrentWeather>() }
-    private val loadError by lazy { MutableLiveData<Boolean>() }
-    private val loading by lazy { MutableLiveData<Boolean>() }
-
+    internal val loadError by lazy { MutableLiveData<Boolean>() }
+    internal val loading by lazy { MutableLiveData<Boolean>() }
+    lateinit var futureWeatherDB: LiveData<FutureWeather>
 
     private val disposable = CompositeDisposable()
 
@@ -108,4 +108,11 @@ class MainViewModel @Inject constructor(
     }
 
 
+    fun getOfflineData(): LiveData<FutureWeather> {
+
+        futureWeatherDB = weatherDao.getCurrentWeather()
+
+        return futureWeatherDB
+
+    }
 }
