@@ -18,12 +18,12 @@ interface WeatherDao {
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-     fun insertAllCurrent(currentWeather: FutureWeather)
+    fun insertAllCurrent(currentWeather: FutureWeather)
 
     @Query("SELECT * FROM currentWeather")
     fun getCurrentObservation(): LiveData<CurrentWeather>
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-     fun insertAllObservation(currentWeather: CurrentWeather)
+    fun insertAllObservation(currentWeather: CurrentWeather)
 }

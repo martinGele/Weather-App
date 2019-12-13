@@ -81,9 +81,12 @@ class MainViewModel @Inject constructor(
 
 
                         GlobalScope.launch(Dispatchers.IO) {
-                            weatherDao.insertAllObservation(current)
 
+
+                            weatherDao.insertAllObservation(current)
                         }
+
+
                         loadError.value = false
                         currentWeather.value = current
                         loading.value = false
