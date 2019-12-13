@@ -14,10 +14,10 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.android.example.github.di.Injectable
 import com.martin.one.R
+import com.martin.one.util.isConnected
 import com.martin.weatherestonia.adapter.FourDaysFourcastAdapter
 import com.martin.weatherestonia.model.Forecast
 import com.martin.weatherestonia.model.FutureWeather
-import com.martin.one.util.isConnected
 import kotlinx.android.synthetic.main.fragment_main_screen.*
 import javax.inject.Inject
 
@@ -53,25 +53,32 @@ class MainScreenFragment : Fragment(), Injectable {
         super.onViewCreated(view, savedInstanceState)
 
 
+        /**
+         * on start check if there is internet, if there is no internet then fall on database cache
+         * if the app is started tr the first time and there is no internet show the user the proper message
+         */
 
         if (context!!.isConnected) {
             mainViewModel.showFourDaysWeather()
             mainViewModel.showCurrentWeather()
-
             mainViewModel.weather.observe(this, weatherListDataObserver)
             mainViewModel.loading.observe(this, loadingLiveDataObserver)
             mainViewModel.loadError.observe(this, onErrorLiveDataObserver)
 
         } else {
 
-            Toast.makeText(context,R.string.no_internet, Toast.LENGTH_LONG).show()
-
+            Toast.makeText(context, R.string.no_internet, Toast.LENGTH_LONG).show()
             mainViewModel.getOfflineData().observe(this, weatherListDataObserverDB)
+            Toast.makeText(context, R.string.no_internet, Toast.LENGTH_LONG).show()
+
         }
 
+        /**
+         * refresh layout listener to refresh the weather data from the api
+         */
 
         refresh_layout.setOnRefreshListener {
-            if(context!!.isConnected) {
+            if (context!!.isConnected) {
                 weatherForecastRecycler.visibility = View.GONE
                 listError.visibility = View.GONE
                 loadingView.visibility = View.VISIBLE
@@ -79,15 +86,15 @@ class MainScreenFragment : Fragment(), Injectable {
                 mainViewModel.showCurrentWeather()
 
                 refresh_layout.isRefreshing = false
-            }else{
+            } else {
                 refresh_layout.isRefreshing = false
-
-                Toast.makeText(context,R.string.no_internet, Toast.LENGTH_LONG).show()
+                Toast.makeText(context, R.string.no_internet, Toast.LENGTH_LONG).show()
 
             }
         }
-
-
+        /**
+         * setup the recycler view adapter
+         */
         weatherForecastRecycler.apply {
             addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
@@ -97,7 +104,9 @@ class MainScreenFragment : Fragment(), Injectable {
 
     }
 
-
+    /**
+     * show the list of cities with data
+     */
     private val weatherListDataObserver = Observer<FutureWeather> { it ->
         it?.let {
             weatherForecastRecycler.visibility = View.VISIBLE
@@ -106,6 +115,9 @@ class MainScreenFragment : Fragment(), Injectable {
 
 
     }
+    /**
+     * while the data is still loading
+     */
 
     private val loadingLiveDataObserver = Observer<Boolean> { isLoading ->
         loadingView.visibility = if (isLoading) View.VISIBLE else View.GONE
@@ -114,16 +126,32 @@ class MainScreenFragment : Fragment(), Injectable {
             weatherForecastRecycler.visibility = View.GONE
         }
     }
+    /**
+     * on error received
+     */
     private val onErrorLiveDataObserver = Observer<Boolean> { error ->
         listError.visibility = if (error) View.VISIBLE else View.GONE
     }
 
+    /**
+     * fall on database cache if there is no interenet present
+     */
     private val weatherListDataObserverDB = Observer<FutureWeather> { it ->
-
-        it?.let {
-            weatherForecastRecycler.visibility = View.VISIBLE
-            adapterFutureWeather.updateWeatherList(it.forecasts as List<Forecast>)
+        /**
+         * check the databaes if there is any data( if not null show data)
+         */
+        if (it != null) {
+            it?.let {
+                weatherForecastRecycler.visibility = View.VISIBLE
+                adapterFutureWeather.updateWeatherList(it.forecasts as List<Forecast>)
+            }
+        } else {
+            /**
+             * the database is empty
+             */
+            listError.visibility = View.VISIBLE
         }
+
     }
 
 }
